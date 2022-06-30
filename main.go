@@ -36,7 +36,10 @@ func init() {
 	}
 }
 
-
+// @title 博客系统
+// @version 1.0
+// @description Go 写的博客系统
+// @termsOfService https://github.com/aleiyoy/toolkit
 func main() {
 	gin.SetMode(global.ServerSetting.RunMode)
 
