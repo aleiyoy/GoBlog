@@ -1,5 +1,6 @@
 package model
 
+import "GoBlog/pkg/app"
 
 type Article struct {
 	*Model
@@ -12,4 +13,9 @@ type Article struct {
 
 func (a Article) TableName() string {
 	return "blog_article"
+}
+
+type ArticleSwagger struct {
+	List 	[]*Article
+	Pagger 	*app.Pager
 }
