@@ -1,9 +1,10 @@
 package routers
 
 import (
+	_ "GoBlog/docs"
+	"GoBlog/internal/middleware"
 	v1 "GoBlog/internal/routers/api/v1"
 	"github.com/gin-gonic/gin"
-	_ "GoBlog/docs"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
@@ -14,6 +15,9 @@ func NewRouter() *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
+	// 自定义错误信息翻译中间件
+	// go-playground/validator 默认的错误信息是英文，但我们的错误信息不一定是用的英文，有可能要简体中文
+	r.Use(middleware.Translations())
 
 	// 接口文档的路由
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
