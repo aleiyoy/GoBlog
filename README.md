@@ -68,3 +68,40 @@ func NewRouter() *gin.Engine {
 ```
 ### 访问
 http://127.0.0.1:8000/swagger/index.html
+
+
+## 处理 model 回调
+针对我们的公共字段 created_on、modified_on、deleted_on、is_del 进行处理，如果每一个 DB 操作都去设置公共字段的值，那么不仅多了很多重复的代码，在要调整公共字段时工作量也会翻倍。
+采用设置 model callback 的方式去实现公共字段的处理，本项目使用的 ORM 库是 GORM，GORM 本身是提供回调支持的，因此我们可以根据自己的需要自定义 GORM 的回调操作，而在 GORM 中我们可以分别进行如下的回调相关行为：
+- 注册一个新的回调。
+- 删除现有的回调。
+- 替换现有的回调。
+- 注册回调的先后顺序。
+
+在本项目中使用到的“替换现有的回调”这一行为
+
+## Gorm不判断零值是 有意义值还是空值
+
+```go
+func (t Tag) Update(db *gorm.DB, values interface{}) error {
+	// 这里不用结构体更新数据库，是因为gorm很难判断结构体中state字段的0，是空值还是真实并有意义的值
+	if err := db.Model(t).Where("id = ? AND is_del = ?", t.ID, 0).Updates(values).Error; err != nil {
+		return err
+	}
+	return nil
+
+	//return db.Model(&Tag{}).Where("id = ? AND is_del = ?", t.ID, 0).Update(t).Error
+}
+```
+
+## validater验证器会认为 state=0  为空值，并非有意义的0
+可以将接口参数结构体的state字段改成指针类型
+```go
+	newState := convert.StrTo(c.Param("state")).MustUInt8()
+	param := service.UpdateTagRequest{
+		ID:    convert.StrTo(c.Param("id")).MustUInt32(),
+		State: &newState,  // 这里不用指针验证器会认为0是空值
+	}
+	response := app.NewResponse(c)
+	valid, errs := app.BindAndValid(c, &param)
+```
