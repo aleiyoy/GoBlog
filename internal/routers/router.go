@@ -2,11 +2,13 @@ package routers
 
 import (
 	_ "GoBlog/docs"
+	"GoBlog/global"
 	"GoBlog/internal/middleware"
 	v1 "GoBlog/internal/routers/api/v1"
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
+	"net/http"
 )
 
 
@@ -21,9 +23,11 @@ func NewRouter() *gin.Engine {
 
 	// 接口文档的路由
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	r.StaticFS("/static", http.Dir(global.AppSetting.UploadSavePath))
 
 	airticle := v1.NewArticle()
 	tag := v1.NewTag()
+	upload := v1.NewUpload()
 
 	apiv1 := r.Group("/api/v1")
 	{
@@ -39,6 +43,8 @@ func NewRouter() *gin.Engine {
 		apiv1.PATCH("/articles/:id/state", airticle.Update)
 		apiv1.GET("/articles/:id", airticle.Get)
 		apiv1.GET("/articles", airticle.List)
+
+		r.POST("/upload/file", upload.UploadFile)
 	}
 
 	return r
