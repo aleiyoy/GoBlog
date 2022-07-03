@@ -46,6 +46,16 @@ func (t Tag) Count(db *gorm.DB) (int, error) {
 	return count, nil
 }
 
+func (t Tag) Get(db *gorm.DB) (Tag, error) {
+	var tag Tag
+	err := db.Where("id = ? AND is_del = ? AND state = ?", t.ID, 0, t.State).First(&tag).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return tag, err
+	}
+
+	return tag, nil
+}
+
 func (t Tag) List(db *gorm.DB, pageOffset, pageSize int) ([]*Tag, error) {
 	var tags []*Tag
 	var err error
@@ -57,6 +67,18 @@ func (t Tag) List(db *gorm.DB, pageOffset, pageSize int) ([]*Tag, error) {
 	}
 	db = db.Where("state = ?", t.State)
 	if err = db.Where("is_del = ?", 0).Find(&tags).Error; err != nil {
+		return nil, err
+	}
+
+	return tags, nil
+}
+
+
+func (t Tag) ListByIDs(db *gorm.DB, ids []uint32) ([]*Tag, error) {
+	var tags []*Tag
+	db = db.Where("state = ? AND is_del = ?", t.State, 0)
+	err := db.Where("id IN (?)", ids).Find(&tags).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
 

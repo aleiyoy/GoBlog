@@ -1,6 +1,12 @@
 # GoBlog
-
 一个用go写的博客而已
+
+## 数据块
+### 文章表
+### 标签表：方便Seo收录
+### 关系表：标签-文章 = 一对多
+一个标签可以有多个文章，一个文章一个标签
+
 
 ## Swagger生成接口文档
 
@@ -104,4 +110,74 @@ func (t Tag) Update(db *gorm.DB, values interface{}) error {
 	}
 	response := app.NewResponse(c)
 	valid, errs := app.BindAndValid(c, &param)
+```
+
+
+## 测试用的cmd
+```json
+curl -X POST http://127.0.0.1:8000/api/v1/articles -F 'title=Go的Gin框架教程' -F 'tag_id=1' -F 'content=内容' -F 'cover_image_url=https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d08a7d55720d6cf.png'   -F created_by=yl
+
+curl -X POST http://127.0.0.1:8000/api/v1/articles -F 'title=Go的Gorm教程' -F 'tag_id=1' -F 'content=内容2' -F 'cover_image_url=https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d08a7d55720d6cf.png'   -F created_by=yl
+
+
+
+curl -X PUT http://127.0.0.1:8000/api/v1/articles/1 -F 'title=Go的Gin框架教程' -F 'tag_id=1' -F 'content=内容2--更新后' -F 'cover_image_url=https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d08a7d55720d6cf.png'   -F desc=简述--新增的    -F modified_by=yl2
+
+
+curl -X GET http://127.0.0.1:8000/api/v1/articles/1
+
+
+curl -X GET http://127.0.0.1:8000/api/v1/articles -F tag_id=1
+{
+    "list":[
+        {
+            "id":1,
+            "title":"Go的Gin框架教程",
+            "desc":"",
+            "content":"内容",
+            "cover_image_url":"https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d08a7d55720d6cf.png",
+            "state":0,
+            "tag":{
+                "id":1,
+                "created_by":"",
+                "modified_by":"",
+                "created_on":0,
+                "modified_on":0,
+                "deleted_on":0,
+                "is_del":0,
+                "name":"Go",
+                "state":0
+            }
+        },
+        {
+            "id":2,
+            "title":"Go的Gorm教程",
+            "desc":"",
+            "content":"内容2",
+            "cover_image_url":"https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d08a7d55720d6cf.png",
+            "state":0,
+            "tag":{
+                "id":1,
+                "created_by":"",
+                "modified_by":"",
+                "created_on":0,
+                "modified_on":0,
+                "deleted_on":0,
+                "is_del":0,
+                "name":"Go",
+                "state":0
+            }
+        }
+    ],
+    "pager":{
+        "page":1,
+        "page_size":10,
+        "total_rows":2
+    }
+}
+
+
+
+curl -X DELETE http://127.0.0.1:8000/api/v1/articles/2 
+
 ```

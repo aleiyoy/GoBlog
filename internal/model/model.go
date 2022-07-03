@@ -9,6 +9,11 @@ import (
 	"time"
 )
 
+const (
+	STATE_OPEN  = 1
+	STATE_CLOSE = 0
+)
+
 // 公用字段
 type Model struct {
 	ID         uint32 `gorm:"primary_key" json:"id"`
@@ -41,6 +46,7 @@ func NewDBEngine(databaseSetting *setting.DatabaseSettingS) (*gorm.DB, error) {
 	db.SingularTable(true)  // ? 单数表啥意思
 
 	//三个 Callback 方法进行回调注册，才能够让我们的应用程序真正的使用上，至此，我们的公共字段处理就完成
+	// 有了这个，再执行创建更新和删除的时候会按我们事先定义好的函数程序执行对公共字段的相关操作
 	db.Callback().Create().Replace("gorm:update_time_stamp", updateTimeStampForCreateCallback)
 	db.Callback().Update().Replace("gorm:update_time_stamp", updateTimeStampForUpdateCallback)
 	db.Callback().Delete().Replace("gorm:delete", deleteCallback)
@@ -90,6 +96,7 @@ func deleteCallback(scope *gorm.Scope) {
 		isDelField, hasIsDelField := scope.FieldByName("IsDel")
 		if !scope.Search.Unscoped && hasDeletedOnField && hasIsDelField {
 			now := time.Now().Unix()
+			// UPDATE `blog_article` SET `deleted_on`=1656842870,`is_del`=1  WHERE `blog_article`.`id` = 2 AND ((id = 2 AND is_del = 0))
 			scope.Raw(fmt.Sprintf(
 				"UPDATE %v SET %v=%v,%v=%v%v%v",
 				scope.QuotedTableName(),
